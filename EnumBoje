@@ -1,0 +1,9 @@
+package com.example.povezi4;
+
+public enum boje {
+
+    bela,
+    crvena,
+    zuta;
+
+}
