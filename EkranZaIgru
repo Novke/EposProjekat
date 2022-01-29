@@ -1,0 +1,398 @@
+package com.example.povezi4;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
+import android.content.pm.ActivityInfo;
+import android.os.Bundle;
+import android.view.KeyEvent;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.TextView;
+import android.widget.Toast;
+
+
+public class igra extends AppCompatActivity {
+    private Button d11, d12, d13, d14, d15, d16, d17; //deklaracija svih neophodnih dugmica koji se ne koriste u svojoj klasicnoj primeni vec samo kao
+    private Button d21, d22, d23, d24, d25, d26, d27; //pregled matrice koja se nalazi u klasi Partija
+    private Button d31, d32, d33, d34, d35, d36, d37;
+    private Button d41, d42, d43, d44, d45, d46, d47;
+    private Button d51, d52, d53, d54, d55, d56, d57;
+    private Button d61, d62, d63, d64, d65, d66, d67;
+    private Button d1,  d2,  d3,  d4,  d5,  d6,  d7 ;
+    private Button zuto, crveno;
+    private Button ok;
+    private ImageButton undo;
+
+    Partija gejm;
+    Partija rez1;
+    Partija rez2;
+    Partija rez3;
+
+    TextView text;
+    Boolean crveni;
+
+    Dialog  kraj;
+    TextView zutiTextView;
+    TextView crveniTextView;
+
+
+    Integer brojOdigranih = 0;
+    Integer pomUndo = 3;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        //setContentView(R.layout.activity_main2);
+        setContentView(R.layout.igratest);
+
+        this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT); //zabrana rotacije, dolazilo je do gresaka////////////////////////////////////
+
+        String igrac1 = getIntent().getStringExtra("Igrac1"); //Preuzimanje podataka s pocetnog ekrana///////////////////////////////
+        String igrac2 = getIntent().getStringExtra("Igrac2");
+        Boolean zuti = getIntent().getBooleanExtra("zuti", true);
+
+        crveni = zuti;
+
+        gejm = new Partija(igrac1, igrac2, zuti);
+        rez1 = new Partija(igrac1, igrac2, zuti); //rezervne kopije koje sluza za undo//////////////////////////////
+        rez2 = new Partija(igrac1, igrac2, zuti);
+        rez3 = new Partija(igrac1, igrac2, zuti);
+        text = findViewById(R.id.textViewIgrac1);
+
+
+        d1 = findViewById(R.id.button1); //inicijalizacija dugmica//////////////////////////////////
+        d2 = findViewById(R.id.button2);
+        d3 = findViewById(R.id.button3);
+        d4 = findViewById(R.id.button4);
+        d5 = findViewById(R.id.button5);
+        d6 = findViewById(R.id.button6);
+        d7 = findViewById(R.id.button7);
+
+        d11 = findViewById(R.id.button11);
+        d12 = findViewById(R.id.button12);
+        d13 = findViewById(R.id.button13);
+        d14 = findViewById(R.id.button14);
+        d15 = findViewById(R.id.button15);
+        d16 = findViewById(R.id.button16);
+        d17 = findViewById(R.id.button17);
+
+        d21 = findViewById(R.id.button21);
+        d22 = findViewById(R.id.button22);
+        d23 = findViewById(R.id.button23);
+        d24 = findViewById(R.id.button24);
+        d25 = findViewById(R.id.button25);
+        d26 = findViewById(R.id.button26);
+        d27 = findViewById(R.id.button27);
+
+        d31 = findViewById(R.id.button31);
+        d32 = findViewById(R.id.button32);
+        d33 = findViewById(R.id.button33);
+        d34 = findViewById(R.id.button34);
+        d35 = findViewById(R.id.button35);
+        d36 = findViewById(R.id.button36);
+        d37 = findViewById(R.id.button37);
+
+        d41 = findViewById(R.id.button41);
+        d42 = findViewById(R.id.button42);
+        d43 = findViewById(R.id.button43);
+        d44 = findViewById(R.id.button44);
+        d45 = findViewById(R.id.button45);
+        d46 = findViewById(R.id.button46);
+        d47 = findViewById(R.id.button47);
+
+        d51 = findViewById(R.id.button51);
+        d52 = findViewById(R.id.button52);
+        d53 = findViewById(R.id.button53);
+        d54 = findViewById(R.id.button54);
+        d55 = findViewById(R.id.button55);
+        d56 = findViewById(R.id.button56);
+        d57 = findViewById(R.id.button57);
+
+        d61 = findViewById(R.id.button61);
+        d62 = findViewById(R.id.button62);
+        d63 = findViewById(R.id.button63);
+        d64 = findViewById(R.id.button64);
+        d65 = findViewById(R.id.button65);
+        d66 = findViewById(R.id.button66);
+        d67 = findViewById(R.id.button67);
+
+        zuto =(Button) findViewById(R.id.buttonZuti);
+        crveno=(Button) findViewById(R.id.buttonCrveni);
+        undo = (ImageButton) findViewById(R.id.undo);
+
+        kraj = new Dialog(this); //dijalog za ispisivanje na kraju partije
+        kraj.setContentView(R.layout.kraj);
+        kraj.getWindow().setBackgroundDrawable(getDrawable(R.drawable.dialogbackground));
+        kraj.setCancelable(false);
+        ok = (Button) kraj.findViewById(R.id.button);
+        zutiTextView = (TextView) kraj.findViewById(R.id.textViewZuti);
+        crveniTextView = (TextView) kraj.findViewById(R.id.textViewCrveni);
+        koIgra();
+
+        ok.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                gejm.obojiSveU(boje.bela);
+                obojiSve();
+                crveni = !crveni;
+                gejm.igraCrveni = !crveni;
+                brojOdigranih=0;
+                kraj.dismiss();
+                koIgra();
+                rez1.kopiraj(gejm);
+                rez2.kopiraj(rez1);
+                rez3.kopiraj(rez2);
+            }
+        });
+
+        undo.setOnClickListener(new View.OnClickListener() { //korisceno za vreme testiranje, sad se ne nalazi na ekranu////////////////////////
+            @Override
+            public void onClick(View v) {
+
+                undoDugme();
+            }
+        });
+
+
+
+        d1.setOnClickListener(new View.OnClickListener() { //dugmici na dnu ekrana pomocu kojih se igra////////////////////////////
+            @Override
+            public void onClick(View v) {
+                if (gejm.polje[0][0]!=boje.bela) return; //provera da li je kolona puna///////////////////////////////////////////
+
+                dugme(0);  //svako dugme ima vrlo slicnu funkciju pa je napravljena posebna funkcija kojoj samo treba proslediti redni broj kolone////////////////
+            }
+        });
+
+        d2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (gejm.polje[0][1]!=boje.bela) return;
+                dugme(1);
+            }
+
+
+        });
+
+
+        d3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+
+                if (gejm.polje[0][2]!=boje.bela) return;
+                dugme(2);
+            }
+        });
+
+
+        d4.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+
+                if (gejm.polje[0][3]!=boje.bela) return;
+                dugme(3);
+            }
+        });
+
+
+
+        d5.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+
+                if (gejm.polje[0][4]!=boje.bela) return;
+                dugme(4);
+            }
+        });
+
+
+        d6.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+
+                if (gejm.polje[0][5]!=boje.bela) return;
+                dugme(5);
+            }
+        });
+
+
+        d7.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+
+                if (gejm.polje[0][6]!=boje.bela) return;
+                dugme(6);
+            }
+        });
+    }
+
+    private void undoDugme() {
+        if (pomUndo>2) { //moguca su ukupno 3 undo-a zaredom, vise od toga ne pamti////////////////////////////////////////////
+
+            exitByBackKey(); //ako nakon 3 undo-a korisnik opet stisne dugme za nazad ponudice dijalog za izlaz iz ekrana///////////////////////
+            return;
+        }
+        gejm.kopiraj(rez1); //gejm ide korak unazad, kao i sve osim poslednje rezerve (poslednja nema gde)/////////////////////////
+        rez1.kopiraj(rez2);
+        rez2.kopiraj(rez3);
+
+        if (pomUndo<=2) {
+            pomUndo++;
+            gejm.sledeci();
+        }
+
+
+        koIgra();
+        obojiSve();
+
+
+    }
+
+    private void toast(String pobeda) {
+        Toast.makeText(this, pobeda, Toast.LENGTH_SHORT).show();
+    }
+    
+    public void dugme(int kolona){ //funkcija za dugmice
+        rez3.kopiraj(rez2);
+        rez2.kopiraj(rez1);
+        rez1.kopiraj(gejm);
+        if (pomUndo>0) pomUndo--; //broj undo-ova zaredom se smanjuje//////////////////////////////
+
+        if (++brojOdigranih>=42){ //ako je popunjen ekran ceo onda je nereseno/////////////////////
+            gejm.obojiSveU(boje.bela);
+            obojiSve();
+            brojOdigranih=0;
+            crveni=!crveni;
+            return;
+        }
+        gejm.ubaci(kolona);
+        obojiSve();
+        if (gejm.ima4) { //proverava da li ima 4 zaredom i poziva kraj()////////////////////
+            gejm.kraj();
+            zutiTextView.setText(gejm.skor1());
+            crveniTextView.setText(gejm.skor2());
+            kraj.show(); //pokazuje dijalog za kraj partije//////////////////////////
+            return;
+        }
+        gejm.sledeci();
+        koIgra();
+    }
+    public void koIgra(){
+        text.setText(gejm.koIgra());
+        if (!gejm.igraCrveni) { //u zavisnosti od toga ko je na redu pojavljuje se na ekranu zuti ili crveni pravougaonik/////////////////////
+            crveno.setVisibility(View.VISIBLE);
+            zuto.setVisibility(View.INVISIBLE);
+        }
+        else {
+            crveno.setVisibility(View.INVISIBLE);
+            zuto.setVisibility(View.VISIBLE);
+        }
+
+
+    }
+
+    public void obojiSve(){ //nakon svakog poteza se poziva, boji sve dugmice na ekranu prema matrici boja u logici partije////////////////////////
+        obojiDugme(d11, gejm.polje[0][0]);
+        obojiDugme(d12, gejm.polje[0][1]);
+        obojiDugme(d13, gejm.polje[0][2]);
+        obojiDugme(d14, gejm.polje[0][3]);
+        obojiDugme(d15, gejm.polje[0][4]);
+        obojiDugme(d16, gejm.polje[0][5]);
+        obojiDugme(d17, gejm.polje[0][6]);
+
+        obojiDugme(d21, gejm.polje[1][0]);
+        obojiDugme(d22, gejm.polje[1][1]);
+        obojiDugme(d23, gejm.polje[1][2]);
+        obojiDugme(d24, gejm.polje[1][3]);
+        obojiDugme(d25, gejm.polje[1][4]);
+        obojiDugme(d26, gejm.polje[1][5]);
+        obojiDugme(d27, gejm.polje[1][6]);
+
+        obojiDugme(d31, gejm.polje[2][0]);
+        obojiDugme(d32, gejm.polje[2][1]);
+        obojiDugme(d33, gejm.polje[2][2]);
+        obojiDugme(d34, gejm.polje[2][3]);
+        obojiDugme(d35, gejm.polje[2][4]);
+        obojiDugme(d36, gejm.polje[2][5]);
+        obojiDugme(d37, gejm.polje[2][6]);
+
+        obojiDugme(d41, gejm.polje[3][0]);
+        obojiDugme(d42, gejm.polje[3][1]);
+        obojiDugme(d43, gejm.polje[3][2]);
+        obojiDugme(d44, gejm.polje[3][3]);
+        obojiDugme(d45, gejm.polje[3][4]);
+        obojiDugme(d46, gejm.polje[3][5]);
+        obojiDugme(d47, gejm.polje[3][6]);
+
+        obojiDugme(d51, gejm.polje[4][0]);
+        obojiDugme(d52, gejm.polje[4][1]);
+        obojiDugme(d53, gejm.polje[4][2]);
+        obojiDugme(d54, gejm.polje[4][3]);
+        obojiDugme(d55, gejm.polje[4][4]);
+        obojiDugme(d56, gejm.polje[4][5]);
+        obojiDugme(d57, gejm.polje[4][6]);
+
+        obojiDugme(d61, gejm.polje[5][0]);
+        obojiDugme(d62, gejm.polje[5][1]);
+        obojiDugme(d63, gejm.polje[5][2]);
+        obojiDugme(d64, gejm.polje[5][3]);
+        obojiDugme(d65, gejm.polje[5][4]);
+        obojiDugme(d66, gejm.polje[5][5]);
+        obojiDugme(d67, gejm.polje[5][6]);
+    }
+
+    public void obojiDugme(Button dugme, boje boja){ //boji konkretno dugme u neku boju
+        if (boja==boje.bela) dugme.setBackground(getResources().getDrawable(R.drawable.dugmebelo));
+        if (boja==boje.crvena) dugme.setBackground(getResources().getDrawable(R.drawable.dugmecrveno));
+        if (boja==boje.zuta) dugme.setBackground(getResources().getDrawable(R.drawable.dugmezuto));
+    }
+
+
+    public boolean onKeyDown(int keyCode, KeyEvent event) { //funkcija za dugme "nazad" na telefonu////////////////////////
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+//            exitByBackKey();
+
+            undoDugme();
+
+            //moveTaskToBack(false);
+
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    protected void exitByBackKey() { //funkcija za izlaz iz ekrana sa dijalogom za potvrdu////////////////////////////
+
+        AlertDialog alertbox = new AlertDialog.Builder(this)
+                .setMessage("Sigurno?")
+                .setPositiveButton("Da", new DialogInterface.OnClickListener() {
+
+                    // do something when the button is clicked
+                    public void onClick(DialogInterface arg0, int arg1) {
+
+                        finish();
+                        //close();
+
+
+                    }
+                })
+                .setNegativeButton("Ne", new DialogInterface.OnClickListener() {
+
+                    // do something when the button is clicked
+                    public void onClick(DialogInterface arg0, int arg1) {
+                    }
+                })
+                .show();
+
+    }
+}
