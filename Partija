@@ -1,0 +1,227 @@
+package com.example.povezi4;
+
+public class Partija {
+
+
+
+
+    boje[][] polje = new boje[6][7]; //matrica 6x7 polja nabrojivog tipa "boje" koja sluzi za logiku///////////////////////
+    public String igrac1 = "";
+    public String igrac2 = "";
+    public Integer redovi = 6;
+    public Integer kolone = 7;
+    public Boolean igraCrveni = true;
+    public Boolean ima4 = false;
+    public int pobede1 = 0;
+    public int pobede2 = 0;
+
+    public boje getPolje(int red, int kolona){
+        return polje[red][kolona];
+    }
+
+    public Partija(String igrac1, String igrac2, boolean igraZuti){ //konstruktor za partiju///////////////////////////////
+
+        this.igrac1 = igrac1.toString(); //imena igraca ne moraju da se popune, automatski ce biti ispisano "Igrac 1/2" ako na prvom ekranu ne bude popunjen EditText/////////////
+        this.igrac2 = igrac2.toString();
+        igraCrveni = !igraZuti;
+
+        for (int i  = 0; i < redovi; i++){
+            for (int j = 0; j < kolone; j++) polje[i][j] = boje.bela;
+        }
+    }
+
+    public void kopiraj(Partija p){ //sluzi za kopiranje cele matrice, kopije se cuvaju u slucaju da korisnik zeli da uradi "undo"
+        boje pom;
+        for (int i = 0; i < redovi; i++){
+            for (int j = 0; j < kolone; j++){
+                pom = p.getPolje(i,j);
+                this.polje[i][j]=pom;
+
+            }
+        }
+    }
+
+    public String skor1(){
+        return igrac1+"    [ " + pobede1+" ]        ";
+    }
+
+    public String skor2(){
+        return "[ " + pobede2 + " ]    " + igrac2;
+    }
+
+    public String koIgra(){
+         return igraCrveni? "IGRA: " + igrac2 : "IGRA: " + igrac1;
+    }
+
+    public void kraj(){ //ova funkcija se pokrece kada program primeti da je doslo do kraja partije/////
+        if (igraCrveni) pobede2++;
+        else pobede1++;
+
+        obojiSveU(boje.bela);
+        ima4 = false;
+    }
+
+    public void ubaci(int kolona){
+        for (int i = 0; i < redovi; i++){
+            if (i == redovi-1){
+               obojiPolje(i, kolona);
+               jelIma4(i, kolona);
+               return;
+            }
+            if (!(polje[i][kolona]==boje.bela)) {
+                //neki ispis necega ili return;
+                return;
+            }
+            if (!(polje[i+1][kolona]==boje.bela)){
+                obojiPolje(i, kolona);
+                jelIma4(i, kolona);
+                return;
+            }
+        }
+    }
+
+    public void obojiSveU(boje boja){ //boji celu matricu u neku boju, najcesce belu da resetuje igru///////////////
+        for (int i = 0; i < redovi;i++){
+            for (int j = 0; j < kolone; j++) {
+                polje[i][j]=boja;
+            }
+        }
+    }
+
+    public void obojiPolje(int red, int kolona){
+        if (igraCrveni) polje[red][kolona] = boje.crvena; else polje[red][kolona] = boje.zuta;
+
+    }
+
+
+
+    public boolean jelIma4(int red, int kolona){ //preostali niz funkcija sluzi da proveri da li nakon odigranog poteza postoje 4 polja zaredom, pocev od polja /////
+                                                 //koje je poslednje obojeno, radi ustede vremena i provera//////////////////////////////////////////////////////////   
+        if (proveriGore(red, kolona)+proveriDole(red, kolona)>=3) return ima4 = true;
+        if (proveriGoreDesno(red, kolona)+proveriDoleLevo(red, kolona)>=3) return ima4 = true;
+        if (proveriGoreLevo(red, kolona)+proveriDoleDesno(red, kolona)>=3) return ima4 = true;
+        if (proveriLevo(red, kolona) + proveriDesno(red, kolona) >= 3) return ima4 = true;
+        return false;
+    }
+
+    private Integer proveriDesno(int red, int kolona) {
+
+        boje boja = polje[red][kolona];
+        int pomRed = red;
+        int pomKol = kolona;
+        int koliko = 0;
+        while (polje[pomRed][pomKol]==boja){
+
+            koliko++;
+
+            if (++pomKol>=kolone) return koliko-1;
+        }
+        return koliko-1;
+    }
+
+    private Integer proveriLevo(int red, int kolona) {
+
+        boje boja = polje[red][kolona];// igraCrveni ?  boje.crvena: boje.zuta;
+        int pomRed = red;
+        int pomKol = kolona;
+        int koliko = 0;
+        while (polje[pomRed][pomKol]==boja){
+
+            koliko++;
+
+            if (--pomKol<0) return koliko-1;
+        }
+        return koliko-1;
+    }
+
+    private Integer proveriDoleDesno(int red, int kolona) {
+        boje boja = polje[red][kolona];// igraCrveni ?  boje.crvena: boje.zuta;
+        int pomRed = red;
+        int pomKol = kolona;
+        int koliko = 0;
+        while (polje[pomRed][pomKol]==boja){
+
+            koliko++;
+
+            if (++pomRed>=redovi || ++pomKol>=kolone) return koliko-1;
+        }
+        return koliko-1;
+    }
+
+    private Integer proveriGoreLevo(int red, int kolona) {
+        boje boja = polje[red][kolona];// igraCrveni ?  boje.crvena: boje.zuta;
+        int pomRed = red;
+        int pomKol = kolona;
+        int koliko = 0;
+        while (polje[pomRed][pomKol]==boja){
+
+            koliko++;
+
+            if (--pomRed<0 || --pomKol<0) return koliko-1;
+        }
+        return koliko-1;
+    }
+
+    private Integer proveriDoleLevo(int red, int kolona) {
+        boje boja = polje[red][kolona];// igraCrveni ?  boje.crvena: boje.zuta;
+        int pomRed = red;
+        int pomKol = kolona;
+        int koliko = 0;
+        while (polje[pomRed][pomKol]==boja){
+
+            koliko++;
+
+            if (++pomRed>=redovi || --pomKol<0) return koliko-1;
+        }
+        return koliko-1;
+    }
+
+    private Integer proveriGoreDesno(int red, int kolona) {
+        boje boja = polje[red][kolona];// igraCrveni ?  boje.crvena: boje.zuta;
+        int pomRed = red;
+        int pomKol = kolona;
+        int koliko = 0;
+        while (polje[pomRed][pomKol]==boja){
+
+            koliko++;
+
+            if (--pomRed<0 || ++pomKol>=kolone) return koliko-1;
+        }
+        return koliko-1;
+    }
+
+    private Integer proveriDole(int red, int kolona) {
+        boje boja;
+        boja = polje[red][kolona]; //igraCrveni ?  boje.crvena: boje.zuta;
+        int pomRed = red;
+        int pomKol = kolona;
+        int koliko = 0;
+        while (polje[pomRed][pomKol]==boja){
+
+            koliko++;
+
+            if (++pomRed>=redovi) return koliko-1;
+        }
+        return koliko-1;
+    }
+
+
+    private Integer proveriGore(int red, int kolona) {
+
+        boje boja = polje[red][kolona];// igraCrveni ?  boje.crvena: boje.zuta;
+        int pomRed = red;
+        int pomKol = kolona;
+        int koliko = 0;
+        while (polje[pomRed][pomKol]==boja){
+
+            koliko++;
+
+            if (--pomRed<0) return koliko-1;
+        }
+        return koliko-1;
+    }
+
+    public void sledeci(){
+        igraCrveni = !igraCrveni;
+    }
+}
